@@ -9,8 +9,8 @@ class Tasks extends MoorActionController
 	public function generate_blocks_data()
 	{
 		global $database;
-		$database->execute('DELETE FROM blocks');
-		$database->execute('DELETE FROM SQLITE_SEQUENCE WHERE name=\'blocks\'');
+		$sql = new fFile(ROOT_PATH.'/database/antesdenoruega.sql');
+		$database->execute($sql->read());
 		$opendata_dir = ROOT_PATH.'/opendata';
 		exec('rm '.$opendata_dir.'/generated/*');
 		exec('sed -i -e s/UTF-8/ISO-8859-1/g '.$opendata_dir.'/Barrios_AC.kml'); // change encoding declaration
