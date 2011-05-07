@@ -15,6 +15,35 @@ function __autoload($class)
 	throw new Exception('The class '.$class.' could not be loaded');
 }
 
+function render($data = null, $callback = null, $format = 'html')
+{
+	static $called = false;
+	// don't return if render is called before after_action
+	if ($called) {
+		return;
+	} else {
+		$called = true;
+	}
+	
+	// make variables available inside view
+	extract($data);
+	if (is_null($callback)) {
+		$callback = Moor::getActiveCallback();
+	}
+	$format = fRequest::getValid('format', array($format, 'rss', 'json'));
+	$tmpl = new fTemplating(APP_PATH.'/views');
+	$tmpl->set(array(
+		'header' => 'header.'.$format.'.php',
+		'footer' => 'footer.'.$format.'.php'
+	));
+	$view = APP_PATH.'/views'.Moor::pathTo($callback).'.'.$format.'.php';
+	if (file_exists($view)) {
+		include $view;
+	} else { // raise not_found()
+		throw new MoorNotFoundException();
+	}
+}
+
 function not_found() {
 	header('HTTP/1.0 404 Not Found');
 	exit('<h1>404 Not Found</h1>'."\n".
