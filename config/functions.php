@@ -49,3 +49,19 @@ function not_found() {
 	exit('<h1>404 Not Found</h1>'."\n".
 	'<p>The page that you have requested could not be found.</p>'."\n");
 }
+
+function round_and_reverse_coords($point, $array = false)
+{
+	$point = array_reverse(array_map('round', explode(',', $point), array(4, 4)));
+	return ($array) ? $point : join(',', $point);
+}
+
+function get_longitude($coord)
+{
+        return $coord[0];
+}
+
+function get_latitude($coord)
+{
+        return $coord[1];
+}
