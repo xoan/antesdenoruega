@@ -4,8 +4,8 @@ Moor::setNotFoundCallback('not_found');
 
 Moor::route('/tasks/@task', 'Tasks::@task');
 
-Moor::route('/blocks/:name', 'Blocks::show');
-Moor::route('/blocks', 'Blocks::index');
+Moor::route('/barrios/:name', 'Blocks::show');
+Moor::route('/barrios', 'Blocks::index');
 Moor::route('/', 'Welcome::index');
 
 Moor::run();
