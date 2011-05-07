@@ -4,6 +4,7 @@ function __autoload($class)
 	$dirs = array(
 		LIB_PATH.'/flourish/classes',
 		LIB_PATH.'/moor',
+		LIB_PATH.'/polyline',
 		APP_PATH.'/models',
 		APP_PATH.'/controllers'
 	);
@@ -50,6 +51,14 @@ function not_found() {
 	'<p>The page that you have requested could not be found.</p>'."\n");
 }
 
+function link_to()
+{
+	$args = func_get_args();
+	return call_user_func_array(
+		'Moor::linkTo', $args
+	);
+}
+
 function round_and_reverse_coords($point, $array = false)
 {
 	$point = array_reverse(array_map('round', explode(',', $point), array(4, 4)));
@@ -64,4 +73,17 @@ function get_longitude($coord)
 function get_latitude($coord)
 {
         return $coord[1];
+}
+
+function encode_polyline($points)
+{
+	if (count($points) > 500) {
+		$encoder = new PolylineEncoder();
+		$polyline = $encoder->encode($points);
+		$path = $polyline->points;
+	} else {
+		$polyline = new Polyline($points);
+		$path = $polyline->encode();
+	}
+	return 'enc:'.$path;
 }
