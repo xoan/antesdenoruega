@@ -8,14 +8,20 @@ class Tasks extends MoorActionController
 	
 	public function index()
 	{
-		echo '<a href="'.link_to('Tasks::generate_blocks_data').'">Generate Blocks Data</a>';
+		echo '<a href="'.link_to('Tasks::create_database_tables').'">Create Database Tables</a>';
+	}
+	
+	public function create_database_tables()
+	{
+		global $database;
+		$sql = new fFile(ROOT_PATH.'/database/antesdenoruega.sql');
+		$database->execute($sql->read());
+		echo Moor::getActiveCallback().' executed.';
+		echo ' <a href="'.link_to('Tasks::generate_blocks_data').'">Generate Blocks Data</a>';
 	}
 	
 	public function generate_blocks_data()
 	{
-		global $database;
-		$sql = new fFile(ROOT_PATH.'/database/blocks.sql');
-		$database->execute($sql->read());
 		$opendata_dir = ROOT_PATH.'/opendata';
 		exec('rm '.$opendata_dir.'/generated/*');
 		exec('sed -i -e s/UTF-8/ISO-8859-1/g '.$opendata_dir.'/Barrios_AC.kml'); // change encoding declaration
@@ -75,15 +81,13 @@ class Tasks extends MoorActionController
 	
 	public function generate_sport_centers_data()
 	{
-		global $database;
-		$sql = new fFile(ROOT_PATH.'/database/sports.sql');
-		$database->execute($sql->read());
 		$base_url = 'http://www.coruna.es';
 		$links[0]  = $base_url.'/servlet/Satellite?argIdCat=1113304696048&argIdRootCat=1113304692453&argTipoCat=Entidad&c=Page&cid=1162774846049&pagename=Portal%2FPage%2FPortal-ListadoConBusqueda';
 		$doc = phpQuery::newDocument(get_data($links[0]));
 		$pages = pq('#paginadorSuperior ul li:has(a) a');
 		foreach ($pages as $page)
 			$links[] = $base_url.pq($page)->attr('href');
+			fCore::expose($links);
 		unset($doc);
 		foreach ($links as $link) {
 			$doc = phpQuery::newDocument(get_data($link));
@@ -98,6 +102,10 @@ class Tasks extends MoorActionController
 					$sport->setName($center_name);
 					$sport->setLocation($center_location);
 					$sport->store();
+					fCore::expose(array(
+						'Centro' => $center_name,
+						'Localización' => $center_location
+					));
 				}
 			}
 		}
@@ -107,27 +115,35 @@ class Tasks extends MoorActionController
 	
 	public function update_sport_centers_coords()
 	{
+		$error = false;
 		$base_url = 'http://maps.googleapis.com/maps/api/geocode/json?address=';
 		$sports = fRecordSet::build('Sport');
 		foreach ($sports as $sport) {
-			$results = json_decode(get_data($base_url.urlencode($sport->getLocation()).'&sensor=false'));
-			foreach ($results->results as $result) {
-				$location = $result->geometry->location;
-				$sport->setLon($location->lng);
-				$sport->setLat($location->lat);
-				$sport->store();
+			if ($sport->getLat() == null or $sport->getLon() == null) {
+				$data_url = $base_url.urlencode($sport->getLocation()).'&sensor=false';
+				$results = json_decode(get_data($data_url));
+				if ('OK' == $results->status and count($results->results) > 0) {
+					foreach ($results->results as $result) {
+						$location = $result->geometry->location;
+						// DEBUG
+						echo $sport->getName();
+						fCore::expose($location);
+						$sport->setLon($location->lng);
+						$sport->setLat($location->lat);
+						$sport->store();
+					}
+				} else {
+					$error = true;
+					echo '<strong>Error:</strong> '.$sport->getName().' (<a href="'.$data_url.'">'.$data_url.'</a>)<br /><br />';
+				}
 			}
 		}
-		echo Moor::getActiveCallback().' executed.';
-		echo ' <a href="'.link_to('Tasks::create_database_tables').'">Create Database Tables</a>';
-	}
-	
-	public function create_database_tables()
-	{
-		global $database;
-		$sql = new fFile(ROOT_PATH.'/database/antesdenoruega.sql');
-		$database->execute($sql->read());
-		echo Moor::getActiveCallback().' executed.';
-		echo ' <a href="'.link_to('Welcome::index').'">Home</a>';
+		if ($error) {
+			echo Moor::getActiveCallback().' completed with errors.';
+			echo ' <a href="'.link_to('Tasks::update_sport_centers_coords').'">Execute again</a>';
+		} else {
+			echo Moor::getActiveCallback().' executed.';
+			echo ' <a href="'.link_to('Welcome::index').'">Home</a>';
+		}
 	}
 }
