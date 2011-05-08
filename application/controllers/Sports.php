@@ -29,6 +29,7 @@ class Sports extends MoorActionController
 		$block = new Block($result->fetchScalar());
 		$path = get_encoded_polyline($block->getFriendlyName());
 		$this->data['sport'] = $sport;
+		$this->data['block'] = $block;
 		$this->data['marker'] = $marker;
 		$this->data['path'] = $path;
 	}
