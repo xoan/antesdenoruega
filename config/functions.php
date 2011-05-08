@@ -90,3 +90,12 @@ function get_data($url)
 	curl_close($ch);
 	return $data;
 }
+
+function get_encoded_polyline($file)
+{
+	$block_coords = new fFile(ROOT_PATH.'/opendata/generated/'.$file.'.txt');
+	foreach ($block_coords as $point) {
+		$points[] = explode(',', $point);
+	}
+	return @encode_polyline($points);
+}

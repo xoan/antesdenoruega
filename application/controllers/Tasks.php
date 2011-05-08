@@ -3,7 +3,12 @@ class Tasks extends MoorActionController
 {
 	protected function afterAction()
 	{
-		echo Moor::getActiveCallback().' executed.';
+		//
+	}
+	
+	public function index()
+	{
+		echo '<a href="'.link_to('Tasks::generate_blocks_data').'">Generate Blocks Data</a>';
 	}
 	
 	public function generate_blocks_data()
@@ -43,6 +48,8 @@ class Tasks extends MoorActionController
 				$block->store();
 			}
 		}
+		echo Moor::getActiveCallback().' executed.';
+		echo ' <a href="'.link_to('Tasks::update_blocks_coords').'">Update Blocks Coords</a>';
 	}
 	
 	public function update_blocks_coords()
@@ -52,16 +59,18 @@ class Tasks extends MoorActionController
 		foreach ($files as $file) {
 			$total = $lon_sum = $lat_sum = 0;
 			foreach ($file as $coord) {
-				list($lon, $lat) = explode(',', $coord);
-				$lon_sum += $lon;
+				list($lat, $lon) = explode(',', $coord);
 				$lat_sum += $lat;
+				$lon_sum += $lon;
 				$total++;
 			}
 			$block = new Block(array('friendly_name' => substr($file->getName(), 0, -4)));
-			$block->setLonAvg($lon_sum / $total);
 			$block->setLatAvg($lat_sum / $total);
+			$block->setLonAvg($lon_sum / $total);
 			$block->store();
 		}
+		echo Moor::getActiveCallback().' executed.';
+		echo ' <a href="'.link_to('Tasks::generate_sport_centers_data').'">Generate Sport Centers Data</a>';
 	}
 	
 	public function generate_sport_centers_data()
@@ -92,6 +101,8 @@ class Tasks extends MoorActionController
 				}
 			}
 		}
+		echo Moor::getActiveCallback().' executed.';
+		echo ' <a href="'.link_to('Tasks::update_sport_centers_coords').'">Update Sport Centers Coords</a>';
 	}
 	
 	public function update_sport_centers_coords()
@@ -107,5 +118,16 @@ class Tasks extends MoorActionController
 				$sport->store();
 			}
 		}
+		echo Moor::getActiveCallback().' executed.';
+		echo ' <a href="'.link_to('Tasks::create_database_tables').'">Create Database Tables</a>';
+	}
+	
+	public function create_database_tables()
+	{
+		global $database;
+		$sql = new fFile(ROOT_PATH.'/database/antesdenoruega.sql');
+		$database->execute($sql->read());
+		echo Moor::getActiveCallback().' executed.';
+		echo ' <a href="'.link_to('Welcome::index').'">Home</a>';
 	}
 }
