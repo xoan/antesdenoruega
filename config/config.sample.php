@@ -1,11 +1,12 @@
 <?php
+// rename file to config.php
 $config['db'] = array(
 	'development' => array(
-		'type' => 'sqlite',
-		'name' => ROOT_PATH.'/database/antesdenoruega.db',
-		'user' => '',
-		'pass' => '',
-		'host' => ''
+		'type' => 'mysql',
+		'name' => 'name',
+		'user' => 'user',
+		'pass' => 'pass',
+		'host' => 'host'
 	),
 	'production' => array(
 		'type' => '',
