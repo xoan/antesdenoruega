@@ -50,20 +50,17 @@ class Tasks extends MoorActionController
 		$blocks_dir = new fDirectory(ROOT_PATH.'/opendata/generated');
 		$files = $blocks_dir->scan('*.txt');
 		foreach ($files as $file) {
+			$total = $lon_sum = $lat_sum = 0;
 			foreach ($file as $coord) {
-				$points[] = explode(',', $coord);
+				list($lon, $lat) = explode(',', $coord);
+				$lon_sum += $lon;
+				$lat_sum += $lat;
+				$total++;
 			}
-			$longitudes = array_map('get_longitude', $points);
-			$latitudes = array_map('get_latitude', $points);
-			$mid_point = array(
-				(max($longitudes) + min($longitudes)) / 2,
-				(max($latitudes) + min($latitudes)) / 2
-			);
 			$block = new Block(array('friendly_name' => substr($file->getName(), 0, -4)));
-			$block->setMidPointLongitude($mid_point[0]);
-			$block->setMidPointLatitude($mid_point[1]);
+			$block->setLonAvg($lon_sum / $total);
+			$block->setLatAvg($lat_sum / $total);
 			$block->store();
-			unset($points);
 		}
 	}
 }

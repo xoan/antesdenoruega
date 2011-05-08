@@ -65,16 +65,6 @@ function round_and_reverse_coords($point, $array = false)
 	return ($array) ? $point : join(',', $point);
 }
 
-function get_longitude($coord)
-{
-        return $coord[0];
-}
-
-function get_latitude($coord)
-{
-        return $coord[1];
-}
-
 function encode_polyline($points)
 {
 	if (count($points) > 500) {
