@@ -63,4 +63,49 @@ class Tasks extends MoorActionController
 			$block->store();
 		}
 	}
+	
+	public function generate_sport_centers_data()
+	{
+		global $database;
+		$sql = new fFile(ROOT_PATH.'/database/sports.sql');
+		$database->execute($sql->read());
+		$base_url = 'http://www.coruna.es';
+		$links[0]  = $base_url.'/servlet/Satellite?argIdCat=1113304696048&argIdRootCat=1113304692453&argTipoCat=Entidad&c=Page&cid=1162774846049&pagename=Portal%2FPage%2FPortal-ListadoConBusqueda';
+		$doc = phpQuery::newDocument(get_data($links[0]));
+		$pages = pq('#paginadorSuperior ul li:has(a) a');
+		foreach ($pages as $page)
+			$links[] = $base_url.pq($page)->attr('href');
+		unset($doc);
+		foreach ($links as $link) {
+			$doc = phpQuery::newDocument(get_data($link));
+			$sport_centers = pq('#unaCategoriaList dl');
+			foreach(pq('dt', $sport_centers) as $sport_center) {
+				$center_name = pq('a', $sport_center)->text();
+				$center_location = str_replace(array(
+					' s/n', ' Bj.', ' Bloque'
+				), '', trim(pq($sport_center)->next()->find('.geoLocalizacion')->text()));
+				if (strlen($center_location) > 0) {
+					$sport = new Sport();
+					$sport->setName($center_name);
+					$sport->setLocation($center_location);
+					$sport->store();
+				}
+			}
+		}
+	}
+	
+	public function update_sport_centers_coords()
+	{
+		$base_url = 'http://maps.googleapis.com/maps/api/geocode/json?address=';
+		$sports = fRecordSet::build('Sport');
+		foreach ($sports as $sport) {
+			$results = json_decode(get_data($base_url.urlencode($sport->encodeLocation()).'&sensor=false'));
+			foreach ($results->results as $result) {
+				$location = $result->geometry->location;
+				$sport->setLon($location->lng);
+				$sport->setLat($location->lat);
+				$sport->store();
+			}
+		}
+	}
 }
