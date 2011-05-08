@@ -10,7 +10,7 @@ class Blocks extends MoorActionController
 	
 	public function index()
 	{
-		$blocks = fRecordSet::build('Block');
+		$blocks = fRecordSet::build('Block', null, array('name' => 'asc'));
 		$this->data['blocks'] = $blocks;
 		
 	}

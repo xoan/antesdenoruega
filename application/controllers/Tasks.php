@@ -9,7 +9,7 @@ class Tasks extends MoorActionController
 	public function generate_blocks_data()
 	{
 		global $database;
-		$sql = new fFile(ROOT_PATH.'/database/antesdenoruega.sql');
+		$sql = new fFile(ROOT_PATH.'/database/blocks.sql');
 		$database->execute($sql->read());
 		$opendata_dir = ROOT_PATH.'/opendata';
 		exec('rm '.$opendata_dir.'/generated/*');

@@ -1,8 +1,9 @@
-DROP TABLE IF EXISTS blocks;
-CREATE TABLE blocks (
+DROP TABLE IF EXISTS users;
+CREATE TABLE users (
 	id integer primary key autoincrement,
-	name varchar(100),
-	friendly_name varchar(100) unique,
-	mid_point_longitude float,
-	mid_point_latitude float
+	name varchar(50) unique,
+	password varchar(80),
+	email varchar(255) unique,
+	block_id integer,
+	FOREIGN KEY (block_id) REFERENCES blocks(id)
 );
