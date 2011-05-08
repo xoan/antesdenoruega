@@ -99,7 +99,7 @@ class Tasks extends MoorActionController
 		$base_url = 'http://maps.googleapis.com/maps/api/geocode/json?address=';
 		$sports = fRecordSet::build('Sport');
 		foreach ($sports as $sport) {
-			$results = json_decode(get_data($base_url.urlencode($sport->encodeLocation()).'&sensor=false'));
+			$results = json_decode(get_data($base_url.urlencode($sport->getLocation()).'&sensor=false'));
 			foreach ($results->results as $result) {
 				$location = $result->geometry->location;
 				$sport->setLon($location->lng);
